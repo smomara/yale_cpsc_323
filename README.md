@@ -49,7 +49,7 @@ Bear in mind these dates are from the Fall 2020 offering of the course. If you a
 | 09/07 | HP6 Appendix J, pp. 13-16                             | Floats                                                   |
 |       | HP6 Appendix J, pp. 62-65                             | Pitfalls & history                                       |
 | 09/16 | [Welch's paper](http://www.cs.duke.edu/courses/spring03/cps296.5/papers/welch_1984_technique_for.pdf)            | A Technique for High-Performance Data Compression |
-| 09/18 | [**Homework #1**]()                                       | Directory "Tree" Search                                  |
+| 09/18 | [**Homework #1**](https://github.com/smomara/yale_cpsc_323/blob/main/homework/h1.md)                             | Directory "Tree" Search |
 | 09/21 | [LZW handout](https://zoo.cs.yale.edu/classes/cs323/current/lzw.txt)                                             | The Lempel-Ziv-Welch Algorithm |
 | 09/30 | [Decimal Version of Faux CRC](http://zoo.cs.yale.edu/classes/cs323/doc/decimal-crc.txt)                          | Decimal CRC |
 |       | HP6 Chapter 1, pp. 1-10                               | Overview                                                 |
