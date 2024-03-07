@@ -2,6 +2,8 @@
 
 This repository is designed to be a valuable resource for individuals interested in engaging with the course materials for [CPSC 323: Introduction to Systems Programming & Computer Organization](https://zoo.cs.yale.edu/classes/cs323/), as offered in Fall 2020 through the Yale Zoo website. It provides a comprehensive overview of the course structure, including a detialed schedule that outlines readings and homework assignments in the sequence they were originally presented. Additionally, users will have acces to an array of class materials, including readings and handouts, facilitating a structured and immersive learning experience.
 
+A prerequisite for engaging with this course material effectively is a thorough understanding of the C programming language, as well as a solid foundation in data structures and algorithms using C. This prerequisite ensures that students have the necesssary background to grasp the concepts of system programming and computer organization, which can involve intricate details about how software interacts with hardware, memory management, and optimization techniques at the system level.
+
 ## Overview
 
 ### Topics Covered/Emphasized
@@ -49,14 +51,14 @@ Bear in mind these dates are from the Fall 2020 offering of the course. If you a
 | 09/07 | HP6 Appendix J, pp. 13-16                             | Floats                                                   |
 |       | HP6 Appendix J, pp. 62-65                             | Pitfalls & history                                       |
 | 09/16 | [Welch's paper](http://www.cs.duke.edu/courses/spring03/cps296.5/papers/welch_1984_technique_for.pdf)            | A Technique for High-Performance Data Compression |
-| 09/18 | [**Homework #1**](https://github.com/smomara/yale_cpsc_323/blob/main/homework/h1.md)                             | Directory "Tree" Search |
+| **09/18** | [**Homework #1**](https://github.com/smomara/yale_cpsc_323/blob/main/homework/h1.md)                             | **Directory "Tree" Search** |
 | 09/21 | [LZW handout](https://zoo.cs.yale.edu/classes/cs323/current/lzw.txt)                                             | The Lempel-Ziv-Welch Algorithm |
 | 09/30 | [Decimal Version of Faux CRC](http://zoo.cs.yale.edu/classes/cs323/doc/decimal-crc.txt)                          | Decimal CRC |
 |       | HP6 Chapter 1, pp. 1-10                               | Overview                                                 |
 |       | HP6 Appendix B, pp. 1-15                              | Memory hierarchy                                         |
 |       | HP6 Chapter 2, pp. 77-84 [optional]                   | Memory hierarchy                                         |
 |       | HP6 Appendix B, pp. 22-23                             | Compulsory/capacity/conflict misses                      |
-| 10/02 | **Homework #2**                                       | Parsing (Some) Bash Commands                             |
+| **10/02** | **Homework #2**                                       | **Parsing (Some) Bash Commands**                            |
 | 10/05 | HP6 Appendix D: pp. 1-5 [optional]                    | Introduction to disks                                    |
 |       | HP6 Appendix D: pp. 6-10                              | RAID |
 |       | HP6 Chapter 2: pp. 92-94                              | Flash memory |
@@ -73,7 +75,7 @@ Bear in mind these dates are from the Fall 2020 offering of the course. If you a
 | | HP6 Chapter 5: pp. 367-377 | MIMD |
 | | HP6 Appendix F: pp. 29-44 [optional] | Networks |
 | 10/21 | HP6 Appendix B: pp. 40-49 | Virtual memory |
-| 10/23 | **Homework #3** | The Shell Game: The Macroprocesor |
+| **10/23** | **Homework #3** | **The Shell Game: The Macroprocesor** |
 | 10/28 | HP6 Chapter 5: pp. 412-417 | Hardware instructions for synchronization |
 | 11/02 | MS, pp. 109-120 | Standard I/O Library [Chapter 3, The Standard I/O Library], [Chapter 3, Formatted Input and Output] |
 | | MS, pp. 96-108 | Systems-level I/O [Chapter 3, System Calls and Device Drivers], [Chapter 3, Library Functions], [Chapter 3, Low-Level File Access] |
@@ -90,7 +92,7 @@ Bear in mind these dates are from the Fall 2020 offering of the course. If you a
 | 11/11 | HP6 Chapter 1: pp. 11-17 | Overview of ISA |
 | | HP6 Appendix A: pp. 1-20 | Instruction Set Architecture |
 | | HP6 Appendix C: pp. 2-30 | Pipelining instructions & hazards |
-| 11/13 | **Homework #4** | An Ounce of Compression |
+| **11/13** | **Homework #4** | **An Ounce of Compression** |
 | 11/16 | HP6 Chapter 3: pp. 168-176 | Pipelining instructions & hazards |
 | | HP6 Chapter 3: pp. 182-188 | Branch prediction |
-| 12/11 | **Homework #5** | The Shell Game: Sister Sue Saw B-Shells ... |
+| **12/11** | **Homework #5** | **The Shell Game: Sister Sue Saw B-Shells ...** |
