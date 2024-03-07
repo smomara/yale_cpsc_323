@@ -21,8 +21,8 @@ This repository is designed to be a valuable resource for individuals interested
 ## Primary Texts
 
 There are two primary texts used throughout the course:
-- [HP6](https://github.com/smomara/yale_cpsc_323/resources/HP6.pdf): John L. Hennesy and David A. Patterson, "Computer Architecture: A Quantitative Approach", 6th edition, Morgan Kaufman, 2017
-- [MS](https://github.com/smomara/yale_cpsc_323/resources/HP6.pdf): Neil Matthew and Richard Stones, "Beginning Linux Programming", 4th edition, Wrox, 2007
+- [HP6](https://github.com/smomara/yale_cpsc_323/blob/main/resources/HP6.pdf): John L. Hennesy and David A. Patterson, "Computer Architecture: A Quantitative Approach", 6th edition, Morgan Kaufman, 2017
+- [MS](https://github.com/smomara/yale_cpsc_323/blob/main/resources/MS.pdf): Neil Matthew and Richard Stones, "Beginning Linux Programming", 4th edition, Wrox, 2007
 
 ## Schedule
 
@@ -91,4 +91,4 @@ Bear in mind these dates are from the Fall 2020 offering of the course. If you a
 | 11/13 | **Homework #4** | An Ounce of Compression |
 | 11/16 | HP6 Chapter 3: pp. 168-176 | Pipelining instructions & hazards |
 | | HP6 Chapter 3: pp. 182-188 | Branch prediction |
-| 12/11 | **Homework #5 | The Shell Game: Sister Sue Saw B-Shells ... |
+| 12/11 | **Homework #5** | The Shell Game: Sister Sue Saw B-Shells ... |
