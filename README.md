@@ -26,7 +26,9 @@ There are two primary texts used throughout the course:
 
 ## Schedule
 
-The following table is an aggregation of the [reading assignments](https://zoo.cs.yale.edu/classes/cs323/current/reading) and the homework assignments from the course's web page on the Yale Zoo website.
+The following table is an aggregation of the [reading assignments](https://zoo.cs.yale.edu/classes/cs323/current/reading) and the homework assignments from the course's web page on the Yale Zoo website. Homework assignments appear on the date they are due in bold.
+
+Bear in mind these dates are from the Fall 2020 offering of the course. If you are following along, just make sure you do it in order.
 
 | Date  | Reading                                               | Topic                                                    |
 |-------|-------------------------------------------------------|----------------------------------------------------------|
@@ -45,12 +47,14 @@ The following table is an aggregation of the [reading assignments](https://zoo.c
 | 09/07 | HP6 Appendix J, pp. 13-16                             | Floats                                                   |
 |       | HP6 Appendix J, pp. 62-65                             | Pitfalls & history                                       |
 | 09/16 | [Welch's paper](http://www.cs.duke.edu/courses/spring03/cps296.5/papers/welch_1984_technique_for.pdf)            | A Technique for High-Performance Data Compression |
+| 09/18 | **Homework #1**                                       | Directory "Tree" Search                                  |
 | 09/21 | [LZW handout](https://zoo.cs.yale.edu/classes/cs323/current/lzw.txt)                                             | The Lempel-Ziv-Welch Algorithm |
 | 09/30 | [Decimal Version of Faux CRC](http://zoo.cs.yale.edu/classes/cs323/doc/decimal-crc.txt)                          | Decimal CRC |
 |       | HP6 Chapter 1, pp. 1-10                               | Overview                                                 |
 |       | HP6 Appendix B, pp. 1-15                              | Memory hierarchy                                         |
 |       | HP6 Chapter 2, pp. 77-84 [optional]                   | Memory hierarchy                                         |
 |       | HP6 Appendix B, pp. 22-23                             | Compulsory/capacity/conflict misses                      |
+| 10/02 | **Homework #2**                                       | Parsing (Some) Bash Commands                             |
 | 10/05 | HP6 Appendix D: pp. 1-5 [optional]                    | Introduction to disks                                    |
 |       | HP6 Appendix D: pp. 6-10                              | RAID |
 |       | HP6 Chapter 2: pp. 92-94                              | Flash memory |
@@ -67,6 +71,7 @@ The following table is an aggregation of the [reading assignments](https://zoo.c
 | | HP6 Chapter 5: pp. 367-377 | MIMD |
 | | HP6 Appendix F: pp. 29-44 [optional] | Networks |
 | 10/21 | HP6 Appendix B: pp. 40-49 | Virtual memory |
+| 10/23 | **Homework #3** | The Shell Game: The Macroprocesor |
 | 10/28 | HP6 Chapter 5: pp. 412-417 | Hardware instructions for synchronization |
 | 11/02 | MS, pp. 109-120 | Standard I/O Library [Chapter 3, The Standard I/O Library], [Chapter 3, Formatted Input and Output] |
 | | MS, pp. 96-108 | Systems-level I/O [Chapter 3, System Calls and Device Drivers], [Chapter 3, Library Functions], [Chapter 3, Low-Level File Access] |
@@ -83,5 +88,7 @@ The following table is an aggregation of the [reading assignments](https://zoo.c
 | 11/11 | HP6 Chapter 1: pp. 11-17 | Overview of ISA |
 | | HP6 Appendix A: pp. 1-20 | Instruction Set Architecture |
 | | HP6 Appendix C: pp. 2-30 | Pipelining instructions & hazards |
+| 11/13 | **Homework #4** | An Ounce of Compression |
 | 11/16 | HP6 Chapter 3: pp. 168-176 | Pipelining instructions & hazards |
 | | HP6 Chapter 3: pp. 182-188 | Branch prediction |
+| 12/11 | **Homework #5 | The Shell Game: Sister Sue Saw B-Shells ... |
