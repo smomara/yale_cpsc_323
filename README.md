@@ -24,6 +24,8 @@ There are two primary texts used throughout the course:
 - [HP6](https://github.com/smomara/yale_cpsc_323/blob/main/resources/HP6.pdf): John L. Hennesy and David A. Patterson, "Computer Architecture: A Quantitative Approach", 6th edition, Morgan Kaufman, 2017
 - [MS](https://github.com/smomara/yale_cpsc_323/blob/main/resources/MS.pdf): Neil Matthew and Richard Stones, "Beginning Linux Programming", 4th edition, Wrox, 2007
 
+*Note: If the text's PDFs do not appear on GitHub, download the raw file.*
+
 ## Schedule
 
 The following table is an aggregation of the [reading assignments](https://zoo.cs.yale.edu/classes/cs323/current/reading) and the homework assignments from the course's web page on the Yale Zoo website. Homework assignments appear on the date they are due in bold.
