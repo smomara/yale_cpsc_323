@@ -1,5 +1,15 @@
 // fiend.c - depth-first directory traversal utility
 
+// TODO:
+// - fix -o and -a
+// - fix -exec
+// - fix symbolic link loop detection
+// - fix combining multiple options not working
+//   - ex) ./fiend -name *.md -maxdepth 2
+// - error handling
+//   - ex) ./fiend -name
+//         ./fiend -newer
+
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
