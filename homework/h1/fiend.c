@@ -98,7 +98,7 @@ Expr *parseExpression(char **argv, int *index) {
             defaultOp = AND;
         } else {
             Expr *expr = malloc(sizeof(Expr));
-            expr->arg = arg;
+            expr->arg = NULL;
             expr->action = NULL;
             expr->test = NULL;
             expr->operator = defaultOp;
@@ -113,15 +113,18 @@ Expr *parseExpression(char **argv, int *index) {
                 }
                 arg[len-2] = '\0';
                 expr->action = execAction;
+                expr->arg = arg+6;
             } else if (strncmp(arg, "-name", 5) == 0) {
-                if (arg[5] != '\0') {
+                if (argv[*index+1] != NULL && argv[*index+1][0] != '-') {
                     expr->test = nameTest;
-                    expr->arg = arg+6;
+                    expr->arg = argv[*index+1];
+                    (*index)++;
                 }
             } else if (strncmp(arg, "-newer", 6) == 0) {
-                if (arg[6] != '\0') {
+                if (argv[*index+1] != NULL && argv[*index+1][0] != '-') {
                     expr->test = newerTest;
-                    expr->arg = arg+7;
+                    expr->arg = argv[*index+1];
+                    (*index)++;
                 }
             }
 
@@ -292,17 +295,8 @@ int main(int argc, char **argv) {
     int numRoots = 0;
 
     int i = 1;
-    while (i < argc) {
-        char *arg = argv[i];
-        if (strcmp(arg, "-L") == 0) {
-            followLinks = 1;
-        } else if (strcmp(arg, "-P") == 0) {
-            followLinks = 0;
-        } else if (arg[0] != '-') {
-            // Reached filename arguments
-            break;
-        }
-        i++;
+    while (i < argc && (strcmp(argv[i], "-L") == 0 || strcmp(argv[i], "-P") == 0)) {
+        followLinks = strcmp(argv[i++], "-P");
     }
 
     while (i < argc && argv[i][0] != '-') {
@@ -319,18 +313,18 @@ int main(int argc, char **argv) {
         if (strcmp(arg, "-depth") == 0) {
             postOrder = 1;
         } else if (strncmp(arg, "-maxdepth", 9) == 0) {
-            if (arg[9] != '\0') {
-                char *depthStr = arg+10;
+            if (argv[i+1] != NULL && argv[i+1][0] != '-') {
+                char *depthStr = argv[i+1];
                 char *endPtr;
                 errno = 0;
                 unsigned long depth = strtoul(depthStr, &endPtr, 10);
-                if (errno != 0 || *endPtr != '\0' || depth > INT_MAX || depth < 0) {
+                if (errno != 0 || *endPtr != '\0' || depth > INT_MAX) {
                     fatalError("invalid max depth");
                 }
                 maxDepth = (int) depth;
+                i++;
             }
-        }
-        else {
+        } else {
             break;
         }
 
