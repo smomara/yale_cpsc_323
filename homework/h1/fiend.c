@@ -5,10 +5,7 @@
 // - fix -exec
 // - fix symbolic link loop detection
 // - fix combining multiple options not working
-//   - ex) ./fiend -name *.md -maxdepth 2
-// - error handling
-//   - ex) ./fiend -name
-//         ./fiend -newer
+//   - ex) ./fiend -print -name *.md
 
 #define _GNU_SOURCE
 #include <stdio.h>
@@ -22,12 +19,19 @@
 #include <fnmatch.h>
 
 #define MAX_PATH 4096
+#define TABLE_SIZE 1024
 
 typedef struct node {
     char *name;
     int depth;
     struct node *next;
 } Node;
+
+typedef struct entry {
+    ino_t inode;
+    dev_t device;
+    struct entry *next;
+} Entry;
 
 typedef enum {AND, OR} Op;
 
@@ -43,6 +47,7 @@ typedef struct expr {
 int followLinks = 0;
 int maxDepth = INT_MAX;
 int postOrder = 0;
+Entry *visitedTable[TABLE_SIZE] = {NULL};
 
 // Print error message to stderr and continue execution
 void errMsg(char *msg) {
@@ -60,11 +65,34 @@ void printFile(char *path) {
     printf("%s\n", path);
 }
 
-// Callback for -exec action
-void execAction(char *cmd) {
-    if (system(cmd) != 0) {
+// Execute command for -exec action
+void execCommand(char *path, char *command) {
+    char *fullCmd = strdup(command);
+    char *marker;
+
+    while ((marker = strstr(fullCmd, "{}"))) {
+        *marker = '\0';
+        char *temp = malloc(strlen(fullCmd) + strlen(path) + strlen(marker+2) + 1);
+        sprintf(temp, "%s%s%s", fullCmd, path, marker+2);
+        free(fullCmd);
+        fullCmd = temp;
+    }
+
+    fflush(stdout);
+    if (system(fullCmd) != 0) {
         errMsg("exec command failed");
     }
+
+    free(fullCmd);
+}
+
+// Callback for -exec action
+void execAction(char *path, char *command) {
+    execCommand(path, command);
+}
+
+void execActionWrapper(char *path) {
+    execAction(path, ((Expr *)path)->arg);
 }
 
 // Return 1 if file name matches specified pattern, 0 otherwise
@@ -94,6 +122,60 @@ int newerTest(char *path, char *refFile) {
             fileStat.st_mtim.tv_nsec > refStat.st_mtim.tv_nsec);
 }
 
+// Parse -name test
+Expr *parseNameTest(char **argv, int *index) {
+    if (argv[*index+1] == NULL || argv[*index+1][0] == '-') {
+        fatalError("missing argument to -name");
+    }
+
+    Expr *expr = malloc(sizeof(Expr));
+    expr->test = nameTest;
+    expr->arg = argv[*index+1];
+    (*index)++;
+
+    return expr;
+}
+
+// Parse -newer test
+Expr *parseNewerTest(char **argv, int *index) {
+    if (argv[*index+1] == NULL || argv[*index+1][0] == '-') {
+        fatalError("missing argument to -name");
+    }
+
+    Expr *expr = malloc(sizeof(Expr));
+    expr->test = newerTest;
+    expr->arg = argv[*index+1];
+    (*index)++;
+
+    return expr;
+}
+
+// Parse -print action
+Expr *parsePrintAction() {
+    Expr *expr = malloc(sizeof(Expr));
+    expr->action = printFile;
+    return expr;
+}
+
+// Parse -exec action
+Expr *parseExecAction(char **argv, int *index) {
+    if (argv[*index+1] == NULL) {
+        fatalError("missing argument to -exec");
+    }
+
+    int len = strlen(argv[*index+1]);
+    if (len < 3 || strcmp(argv[*index+1]+len-2, "\\;") != 0) {
+        fatalError("invalid -exec command");
+    }
+
+    Expr *expr = malloc(sizeof(Expr));
+    expr->action = execActionWrapper;
+    expr->arg = strndup(argv[*index+1], len-2);
+    (*index)++;
+
+    return expr;
+}
+
 // Parse command line expression into Expr linked list
 Expr *parseExpression(char **argv, int *index) {
     Expr *head = NULL, *current = NULL;
@@ -107,36 +189,28 @@ Expr *parseExpression(char **argv, int *index) {
         } else if (strcmp(arg, "-a") == 0) {
             defaultOp = AND;
         } else {
-            Expr *expr = malloc(sizeof(Expr));
-            expr->arg = NULL;
-            expr->action = NULL;
-            expr->test = NULL;
+            Expr *expr = NULL;
+
+            if (strcmp(arg, "-name") == 0) {
+                expr = parseNameTest(argv, index);
+            } else if (strcmp(arg, "-newer") == 0) {
+                expr = parseNewerTest(argv, index);
+            } else if (strcmp(arg, "-print") == 0) {
+                expr = parsePrintAction();
+            } else if (strncmp(arg, "-exec", 5) == 0) {
+                expr = parseExecAction(argv, index);
+            } else if (strcmp(arg, "-depth") == 0) {
+                errMsg("-depth should come before tests, actions, or operators");
+                break;
+            } else if (strncmp(arg, "-maxdepth", 9) == 0) {
+                errMsg("-maxdepth should come before tests, actions, or operators");
+                break;
+            } else {
+                break;
+            }
+
             expr->operator = defaultOp;
             expr->next = NULL;
-
-            if (strcmp(arg, "-print") == 0) {
-                expr->action = printFile;
-            } else if (strncmp(arg, "-exec", 5) == 0) {
-                int len = strlen(arg);
-                if (len < 7 || strcmp(arg+len-2, "\\;") != 0) {
-                    fatalError("invalid -exec command");
-                }
-                arg[len-2] = '\0';
-                expr->action = execAction;
-                expr->arg = arg+6;
-            } else if (strncmp(arg, "-name", 5) == 0) {
-                if (argv[*index+1] != NULL && argv[*index+1][0] != '-') {
-                    expr->test = nameTest;
-                    expr->arg = argv[*index+1];
-                    (*index)++;
-                }
-            } else if (strncmp(arg, "-newer", 6) == 0) {
-                if (argv[*index+1] != NULL && argv[*index+1][0] != '-') {
-                    expr->test = newerTest;
-                    expr->arg = argv[*index+1];
-                    (*index)++;
-                }
-            }
 
             if (head == NULL) {
                 head = expr;
@@ -150,6 +224,32 @@ Expr *parseExpression(char **argv, int *index) {
     }
 
     return head;
+}
+
+// Hash function for inode
+unsigned int hash(ino_t inode) {
+    return inode % TABLE_SIZE;
+}
+
+// Check if inode has already been visited
+int isVisited(ino_t inode, dev_t device) {
+    unsigned int index = hash(inode);
+    Entry *entry = visitedTable[index];
+
+    while (entry != NULL) {
+        if (entry->inode == inode && entry->device == device) {
+            return 1;
+        }
+        entry = entry->next;
+    }
+
+    entry = malloc(sizeof(Entry));
+    entry->inode = inode;
+    entry->device = device;
+    entry->next = visitedTable[index];
+    visitedTable[index] = entry;
+
+    return 0;
 }
 
 // Push path onto stack
@@ -172,47 +272,38 @@ char *popStack(Node **stack) {
     return NULL;
 }
 
-// Check if file/directory has already been visited
-int isVisited(char *path, ino_t inode) {
-    static Node *visited = NULL;
-    Node *current = visited;
-
-    while (current != NULL) {
-        struct stat fileStat;
-
-        if (stat(current->name, &fileStat) == 0 && fileStat.st_ino == inode) {
-            errMsg("symbolic link loop deteced");
-            return 1;
+// Free expression linked list
+void freeExpr(Expr *expr) {
+    while (expr != NULL) {
+        Expr *next = expr->next;
+        if (expr->action == &execActionWrapper) {
+            free(expr->arg);
         }
-        current = current->next;
+        free(expr);
+        expr = next;
     }
+}
 
-    Node *node = malloc(sizeof(Node));
-    node->name = strdup(path);
-    node->next = visited;
-    visited = node;
-
-    return 0;
+// Free visited hashtable entries
+void freeVisited() {
+    for (int i = 0; i < TABLE_SIZE; i++) {
+        Entry *entry = visitedTable[i];
+        while (entry != NULL) {
+            Entry *next = entry->next;
+            free(entry);
+            entry = next;
+        }
+    }
 }
 
 // Evaluate expression for given file path
 int evalExpr(char *path, Expr *expr) {
     while (expr != NULL) {
         int result;
+
         if (expr->action != NULL) {
-            if (expr->action == execAction) {
-                char *fullCmd = strdup(expr->arg);
-                char *marker;
-                while ((marker = strstr(fullCmd, "{}")) != NULL) {
-                    *marker = '\0';
-                    char *temp = malloc(strlen(fullCmd) + strlen(path) + strlen(marker+2) + 1);
-                    sprintf(temp, "%s%s%s", fullCmd, path, marker+2);
-                    free(fullCmd);
-                    fullCmd = temp;
-                }
-                fflush(stdout);
-                expr->action(fullCmd);
-                free(fullCmd);
+            if (expr->action == &execActionWrapper) {
+                execCommand(path, expr->arg);
             } else {
                 expr->action(path);
             }
@@ -231,70 +322,85 @@ int evalExpr(char *path, Expr *expr) {
     return 1;
 }
 
-// Recursively traverse directory tree
-void traverseDir(char *path, int depth, Expr *expr) {
+// Traverse directory tree using a stack
+void traverseDir(char *path, Expr *expr) {
     struct stat fileStat;
-    if (followLinks) {
-        if (stat(path, &fileStat) != 0) {
-            errMsg("cannot stat file");
-            return;
+    if (stat(path, &fileStat) != 0) {
+        if (errno == ENOENT) {
+            fprintf(stderr, "fiend: '%s': No such file or directory\n", path);
+        } else {
+            fprintf(stderr, "fiend: '%s': Cannot access file or directory\n", path);
         }
-    } else {
-        if (lstat(path, &fileStat) != 0) {
-            errMsg("cannot stat file");
-            return;
-        }
+        return;
     }
 
-    // Perform pre-order actions for directories
-    if (!postOrder && S_ISDIR(fileStat.st_mode)) {
-        if (expr == NULL || evalExpr(path, expr)) {
-            printFile(path);
-        }
-    }
+    Node *stack = NULL;
+    pushStack(&stack, path, 0);
 
-    if (S_ISDIR(fileStat.st_mode)) {
-        if (depth < maxDepth) {
-            DIR *dir = opendir(path);
-            if (dir == NULL) {
-                errMsg("cannot open directory");
-                return;
+    while (stack != NULL) {
+        char *currPath = stack->name;
+        int currDepth = stack->depth;
+        popStack(&stack);
+
+        if (followLinks) {
+            if (stat(currPath, &fileStat) != 0) {
+                errMsg("cannot stat file");
+                continue;
             }
-
-            struct dirent *entry;
-            while ((entry = readdir(dir)) != NULL) {
-                if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
-                    continue;
-                }
-
-                char fullPath[MAX_PATH];
-                snprintf(fullPath, sizeof(fullPath), "%s/%s", path, entry->d_name);
-
-                if (!followLinks && S_ISLNK(fileStat.st_mode)) {
-                    continue;
-                }
-
-                if (followLinks && isVisited(fullPath, fileStat.st_ino)) {
-                    continue;
-                }
-
-                traverseDir(fullPath, depth + 1, expr);
+        } else {
+            if (lstat(currPath, &fileStat) != 0) {
+                errMsg("cannot stat file");
+                continue;
             }
+        }
 
-            closedir(dir);
+        if (isVisited(fileStat.st_ino, fileStat.st_dev)) {
+            errMsg("symbolic link loop detected");
+            continue;
         }
-    } else {
-        // Perform actions for regular files
-        if (expr == NULL || evalExpr(path, expr)) {
-            printFile(path);
-        }
-    }
 
-    // Perform post-order actions for directories
-    if (postOrder && S_ISDIR(fileStat.st_mode)) {
-        if (expr == NULL || evalExpr(path, expr)) {
-            printFile(path);
+        // Perform pre-order actions for directories
+        if (!postOrder && S_ISDIR(fileStat.st_mode)) {
+            if (expr == NULL || evalExpr(currPath, expr)) {
+                printFile(currPath);
+            }
         }
+
+        if (S_ISDIR(fileStat.st_mode)) {
+            if (currDepth < maxDepth) {
+                DIR *dir = opendir(currPath);
+                if (dir == NULL) {
+                    errMsg("cannot open directory");
+                } else {
+                    struct dirent *entry;
+                    while ((entry = readdir(dir)) != NULL) {
+                        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+                            continue;
+                        }
+
+                        char fullPath[MAX_PATH];
+                        snprintf(fullPath, sizeof(fullPath), "%s/%s", currPath, entry->d_name);
+                        pushStack(&stack, fullPath, currDepth + 1);
+                    }
+
+                    closedir(dir);
+                }
+            }
+        } else {
+            // Perform actions for regular files
+            if (expr == NULL || evalExpr(currPath, expr)) {
+                printFile(currPath);
+            }
+        }
+
+        // Perform post-order actions for directories
+        if (postOrder && S_ISDIR(fileStat.st_mode)) {
+            if (expr == NULL || evalExpr(currPath, expr)) {
+                printFile(currPath);
+            }
+        }
+
+        free(currPath);
     }
 }
 
@@ -306,12 +412,14 @@ int main(int argc, char **argv) {
 
     int i = 1;
     while (i < argc && (strcmp(argv[i], "-L") == 0 || strcmp(argv[i], "-P") == 0)) {
-        followLinks = strcmp(argv[i++], "-P");
+        followLinks = (strcmp(argv[i++], "-L") == 0);
     }
 
     while (i < argc && argv[i][0] != '-') {
         rootDirs[numRoots++] = argv[i++];
     }
+
+    printf("numRoots: %i\n", numRoots);
 
     if (numRoots == 0) {
         rootDirs[numRoots++] = ".";
@@ -319,21 +427,30 @@ int main(int argc, char **argv) {
 
     while (i < argc) {
         char *arg = argv[i];
+        printf("arg: %s\n", arg);
 
         if (strcmp(arg, "-depth") == 0) {
             postOrder = 1;
+            printf("postOrder: %d\n", postOrder);
         } else if (strncmp(arg, "-maxdepth", 9) == 0) {
-            if (argv[i+1] != NULL && argv[i+1][0] != '-') {
-                char *depthStr = argv[i+1];
-                char *endPtr;
-                errno = 0;
-                unsigned long depth = strtoul(depthStr, &endPtr, 10);
-                if (errno != 0 || *endPtr != '\0' || depth > INT_MAX) {
-                    fatalError("invalid max depth");
-                }
-                maxDepth = (int) depth;
-                i++;
+            if (argv[i+1] == NULL || argv[i+1][0] == '-') {
+                fatalError("missing argument to -maxdepth");
             }
+
+            char *depthStr = argv[i+1];
+            char *endPtr;
+            errno = 0;
+
+            printf("depthStr: %s\n", depthStr);
+
+            long depth = strtol(depthStr, &endPtr, 10);
+            if (errno != 0 || *endPtr != '\0' || depth < 0 || depth > INT_MAX) {
+                fatalError("invalid -maxdepth argument");
+            }
+
+            maxDepth = (int) depth;
+            
+            i++;
         } else {
             break;
         }
@@ -344,8 +461,11 @@ int main(int argc, char **argv) {
     Expr *expr = parseExpression(argv, &i);
 
     for (int j = 0; j < numRoots; j++) {
-        traverseDir(rootDirs[j], 0, expr);
+        traverseDir(rootDirs[j], expr);
     }
+
+    freeExpr(expr);
+    freeVisited();
 
     return 0;
 }
