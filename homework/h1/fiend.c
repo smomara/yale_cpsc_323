@@ -268,6 +268,7 @@ char *popStack(Node **stack) {
         *stack = node->next;
         char *path = node->name;
         free(node);
+        return path;
     }
     return NULL;
 }
@@ -298,9 +299,9 @@ void freeVisited() {
 
 // Evaluate expression for given file path
 int evalExpr(char *path, Expr *expr) {
-    while (expr != NULL) {
-        int result;
+    int result = 1;
 
+    while (expr != NULL) {
         if (expr->action != NULL) {
             if (expr->action == &execActionWrapper) {
                 execCommand(path, expr->arg);
@@ -309,17 +310,18 @@ int evalExpr(char *path, Expr *expr) {
             }
             result = 1;
         } else if (expr->test != NULL) {
-            result = expr->test(path, expr->arg);
-        } else {
-            result = 1;
+            int testResult = expr->test(path, expr->arg);
+            if (expr->operator == AND) {
+                result = result && testResult;
+            } else {
+                result = result || testResult;
+            }
         }
 
-        if ((!result && expr->operator == AND) || (result && expr->operator == OR)) {
-            return result;
-        }
         expr = expr->next;
     }
-    return 1;
+
+    return result;
 }
 
 // Traverse directory tree using a stack
@@ -338,9 +340,11 @@ void traverseDir(char *path, Expr *expr) {
     pushStack(&stack, path, 0);
 
     while (stack != NULL) {
-        char *currPath = stack->name;
-        int currDepth = stack->depth;
-        popStack(&stack);
+        char *currPath = popStack(&stack);
+        int currDepth = 0;
+        if (stack != NULL) {
+            currDepth = stack->depth;
+        }
 
         if (followLinks) {
             if (stat(currPath, &fileStat) != 0) {
@@ -370,7 +374,7 @@ void traverseDir(char *path, Expr *expr) {
             if (currDepth < maxDepth) {
                 DIR *dir = opendir(currPath);
                 if (dir == NULL) {
-                    errMsg("cannot open directory");
+                    fprintf(stderr, "fiend: '%s': cannot open directory\n", currPath);
                 } else {
                     struct dirent *entry;
                     while ((entry = readdir(dir)) != NULL) {
